@@ -65,8 +65,11 @@ class RandomChessEnv(gym.Env):
             if not os.path.exists("frames"):
                 os.mkdir("frames")
 
-            if os.path.exists("random_chess_env.mp4"):
-                os.remove("random_chess_env.mp4")
+            if not os.path.exists("outputs"):
+                os.mkdir("outputs")
+
+            if os.path.exists("outputs/random_chess_env.mp4"):
+                os.remove("outputs/random_chess_env.mp4")
         
         image = np.zeros((self.square_size * self.board_size, self.square_size * self.board_size, 3), dtype=np.int32)
 
@@ -108,7 +111,7 @@ class RandomChessEnv(gym.Env):
         if self.render_mode != "video":
             return
         
-        process = subprocess.Popen(f'ffmpeg -framerate {self.metadata["render_fps"]} -i "frames/%d.png" -c:v libx264 -pix_fmt yuv420p random_chess_env.mp4', shell=True)
+        process = subprocess.Popen(f'ffmpeg -framerate {self.metadata["render_fps"]} -i "frames/%d.png" -c:v libx264 -pix_fmt yuv420p outputs/random_chess_env.mp4', shell=True)
         process.wait()
 
         for filename in os.listdir("frames"):
