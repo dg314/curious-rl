@@ -6,19 +6,12 @@ import cv2
 import subprocess
 import os
 from pathlib import Path
+from curious_rl_gym.helpers.graphics import overlay_image
 
 parent_dir = Path(__file__).parent
 
 def get_path(end: str) -> str:
     return os.path.join(parent_dir, end)
-
-def overlay_image(background: np.array, foreground: np.array) -> np.array:
-    # background: m x n x 3 image
-    # foreground: m x n x 4 image
-
-    alpha = np.repeat(np.expand_dims(foreground[:, :, 3], axis=2), 3, axis=2) / 255.0
-
-    return foreground[:, :, :3] * alpha + background * (1 - alpha)
 
 class RandomChessEnv(gym.Env):
     metadata = {
