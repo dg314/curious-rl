@@ -1,7 +1,15 @@
+import curious_rl_gym
 import gym
-from gym_envs.register_envs import register_envs
 
-if __name__ == "__main__":
-    register_envs()
+env = gym.make("RandomChessEnv-v0", render_mode="video")
 
-    gym.make("RandomChessEnv")
+env.reset()
+
+for i in range(300):
+    action = env.action_space.sample()
+    observation, reward, terminated, truncated, info = env.step(action)
+
+    if terminated:
+        break
+
+env.close()

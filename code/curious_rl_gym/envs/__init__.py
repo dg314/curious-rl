@@ -1,0 +1,1 @@
+from curious_rl_gym.envs.random_chess_env import RandomChessEnv
