@@ -14,7 +14,7 @@ def check_valid_env(env: gym.Env):
 def explore_env(env: gym.Env, strategy: str, num_episodes=1000, max_steps=300, num_disagreement_models=10) -> np.array:
     # strategy
     # - "zero": always select action 0
-    # - "sequential": start with action 0, and then 
+    # - "sequential": start with action 0, and then repeatedly select action (a + 1) % 6 after action a
     # - "random": randomly select an action
     # - "max_entropy": choose the action with max entropy based on the current transition_probs
     # - "min_data": choose the action for which (state, action) has been explored the fewest times
