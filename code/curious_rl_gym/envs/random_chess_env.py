@@ -158,15 +158,19 @@ class RandomChessEnv(gym.Env):
         if piece_name in ["bishop", "queen"]:
             coord_sum = i + j
 
-            for i_next in range(min(i, j), max(i, j) + 1):
-                if i_next != i:
-                    legal_locations.append([i_next, coord_sum - i_next])
+            for i_next in range(0, self.board_size):
+                j_next = coord_sum - i_next
+
+                if i_next != i and i_next >= 0 and i_next < self.board_size and j_next >= 0 and j_next < self.board_size:
+                    legal_locations.append([i_next, j_next])
 
             coord_diff = i - j
             
-            for i_next in range(max(coord_diff, 0), min(7 + coord_diff, 7) + 1):
-                if i_next != i:
-                    legal_locations.append([i_next, i_next - coord_diff])
+            for i_next in range(0, self.board_size):
+                j_next = i_next - coord_diff
+
+                if i_next != i and i_next >= 0 and i_next < self.board_size and j_next >= 0 and j_next < self.board_size:
+                    legal_locations.append([i_next, j_next])
 
         if piece_name == "king":
             for i_diff, j_diff in [
