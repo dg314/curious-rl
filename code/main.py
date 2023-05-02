@@ -12,8 +12,9 @@ if __name__ == "__main__":
     env = gym.make("RandomChessEnv-v0", render_mode=None)
 
     exploration_episodes_list = [30, 100, 300, 1000, 3000, 10000]
+    strategies = ["zero", "sequential", "random", "max_entropy", "min_data", "disagreement"]
 
-    for strategy in "zero", "sequential", "random", "max_entropy", "min_data", "disagreement":
+    for strategy in strategies:
         avg_steps_list = []
 
         for exploration_episodes in exploration_episodes_list:
