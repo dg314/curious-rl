@@ -23,12 +23,9 @@ class RandomChessEnv(gym.Env):
         self.board_size = size
         self.square_size = 32 # In pixels
         
-        self.observation_space = spaces.Dict(
-            {
-                "agent": spaces.Box(0, size - 1, shape=(2,), dtype=int),
-                "target": spaces.Box(0, size - 1, shape=(2,), dtype=int),
-            }
-        )
+
+        self.observation_space = spaces.Discrete(self.board_size ** 2)
+        self._target_location = np.array([0, 0], dtype=int)
 
         self.pieces = ["king", "queen", "bishop", "knight", "rook", "pawn"]
         self.action_space = spaces.Discrete(len(self.pieces))
@@ -43,14 +40,8 @@ class RandomChessEnv(gym.Env):
         assert render_mode is None or render_mode in self.metadata["render_modes"]
         self.render_mode = render_mode
 
-        # Frame of the video, used if render_mode is set to "video"
-        self._frame_num = 0
-
     def _get_obs(self):
-        return {
-            "agent": self._agent_location,
-            "target": self._target_location
-        }
+        return (self._agent_location[0] * self.board_size) + self._agent_location[1]
     
     def _get_info(self):
         return {
@@ -126,12 +117,14 @@ class RandomChessEnv(gym.Env):
         # We need the following line to seed self.np_random
         super().reset(seed=seed)
 
+        # Frame of the video, used if render_mode is set to "video"
+        self._frame_num = 0
+
         self._prev_agent_location = None
         self._agent_location = self.np_random.integers(0, self.board_size, size=2, dtype=int)
-        self._target_location = self._agent_location
         
         while np.array_equal(self._target_location, self._agent_location):
-            self._target_location = self.np_random.integers(
+            self._agent_location = self.np_random.integers(
                 0, self.board_size, size=2, dtype=int
             )
 
