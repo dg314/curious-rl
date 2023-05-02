@@ -15,10 +15,10 @@ def explore_env(env: gym.Env, strategy: str, num_episodes=1000, max_steps=300, n
     # strategy
     # - "zero": always select action 0
     # - "sequential": start with action 0, and then repeatedly select action (a + 1) % 6 after action a
-    # - "random": randomly select an action
+    # - "random": select an action uniformly randomly 
     # - "max_entropy": choose the action with max entropy based on the current transition_probs
-    # - "min_data": choose the action for which (state, action) has been explored the fewest times
-    # - "disagreement": choose the action for which the disagreement between n transition_probs is greatest
+    # - "min_data": choose the action a for which state, action pair (s, a) has been explored the fewest times
+    # - "disagreement": choose the action for which the disagreement between n prediction models is greatest
 
     check_valid_env(env)
 
@@ -38,10 +38,7 @@ def explore_env(env: gym.Env, strategy: str, num_episodes=1000, max_steps=300, n
             for _ in range(num_disagreement_models)
         ])
 
-    for episode in range(num_episodes):
-        if episode % 1000 == 0:
-            print(f"Exploration step: {episode}")
-
+    for _ in range(num_episodes):
         state, _ = env.reset()
 
         for _ in range(max_steps):
@@ -67,8 +64,10 @@ def explore_env(env: gym.Env, strategy: str, num_episodes=1000, max_steps=300, n
             if strategy == "disagreement":
                 action_one_hot = np.zeros((num_actions))
                 action_one_hot[action] = 1
-                prob_change = 1 / state_action_counts[state, action]
-                disagreement_models[:, state, :, next_state] = disagreement_models[:, state, :, next_state] * (1 - prob_change) + action_one_hot * prob_change
+                prob_ratio = 1 / state_action_counts[state, action]
+                old_probs = disagreement_models[:, state, :, next_state]
+                new_probs = old_probs * (1 - prob_ratio) + action_one_hot * prob_ratio
+                disagreement_models[:, state, :, next_state] = new_probs
 
             state = next_state
 
@@ -77,7 +76,9 @@ def explore_env(env: gym.Env, strategy: str, num_episodes=1000, max_steps=300, n
 
         env.close()
 
-    return (state_action_transition_counts.T / state_action_counts.T).T
+    transition_probs = (state_action_transition_counts.T / state_action_counts.T).T
+
+    return transition_probs
 
 def learn_rl_model(env: gym.Env, initial_values: np.array, transition_probs: np.array, gamma=0.95, alpha=0.5, num_episodes=1000, max_steps=300) -> np.array:
     # transition_probs: Matrix of probabilities P(s, a, s'), with shape (num_states x num_actions x num_states)
@@ -92,10 +93,7 @@ def learn_rl_model(env: gym.Env, initial_values: np.array, transition_probs: np.
     
     values = np.copy(initial_values)
 
-    for episode in range(num_episodes):
-        if episode % 1000 == 0:
-            print(f"Training step: {episode}")
-
+    for _ in range(num_episodes):
         state, _ = env.reset()
 
         for _ in range(max_steps):
